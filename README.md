@@ -59,13 +59,60 @@ sugarark REST              业务数据（用户档案 / 匹配 / 推荐 / 视�
 
 ---
 
-## 怎么跑（待 Phase 2.5 启动后填）
+## 首次运行（你装好 Flutter 之后）
+
+> 当前仓库已含 `lib/` Dart 代码 + `pubspec.yaml`，但 **未** 包含 `ios/` `android/` 等原生 scaffold 目录——交付时本机没装 Flutter SDK。下面命令会让 `flutter create` 自动生成原生壳，**不会覆盖** `lib/` 和 `pubspec.yaml`。
 
 ```bash
-# Phase 2.5 启动时填入
+cd Sugarark-App-Client
+
+# 1. 生成 ios / android 原生 scaffold (V1 不做桌面)
+flutter create --org com.sugarark --project-name sugarark_app_client \
+  --platforms=ios,android .
+
+# 2. 拉依赖
 flutter pub get
-flutter run -d ios       # 或 android
+
+# 3. 跑代码生成（Riverpod / json_serializable，目前仅占位，不阻塞首次运行）
+dart run build_runner build --delete-conflicting-outputs
+
+# 4. 启动后端（在另一个终端，主仓 sugarark）
+#    cd ../sugarark && npm run dev
+#    默认监听 http://localhost:3001
+
+# 5. 跑应用（按平台二选一）
+flutter run -d ios         # iPhone / Simulator (主战场)
+flutter run -d android     # Android
+
+# 自定义后端地址（部署时切到 sugarark.com 域名）：
+flutter run -d ios --dart-define=API_BASE_URL=https://api.sugarark.com
+
+# 6. 跑测试
+flutter test
 ```
+
+后端 baseUrl 用 `--dart-define=API_BASE_URL=…` 覆盖；不传时默认 dev `http://localhost:3001`，定义在 [`lib/core/api/api_endpoints.dart`](lib/core/api/api_endpoints.dart)。
+
+### 当前 V1 范围
+
+- User 邮箱密码登录 → 主仓 `/api/v1/auth/login` (复用现有 user JWT，主仓 ADR-0014)
+- JWT 双 token 持久化（access + refresh）到 `flutter_secure_storage`
+- Dio 拦截器自动 401 → refresh → 重放，refresh 失败强制登出
+- 启动页 → 路由根据 AuthState 自动跳 `/login` 或 `/chat`
+- 主壳 = 4-tab 底部导航（聊天 / 推荐 / 档案 / 通知），每 tab 仅占位
+- 登录页底部"还没账号？前往网页注册"按钮 deep-link 到 `https://sugarark.com/register`
+  （**App ADR-0003 V1 不做 App 内注册**，统一走 Web）
+- talkcore IM Token service 已就位（`/api/v1/im/token`），WS 客户端 Phase 2.5.3 实现
+
+### V1 不在 App 内做的事（重要）
+
+- ❌ App 内注册 — 走 Web `https://sugarark.com/register` (ADR-0003)
+- ❌ 桌面端 — 仅 iOS / Android
+- ❌ App 内支付 — 会员等级仍由人工录入
+- ❌ 视频认证录制流程 — Phase 2.5.7
+- ❌ talkcore WS 实际连接 — Phase 2.5.3
+- ❌ 推送注册 (`/users/me/push-tokens`) — 端点已定，UI/SDK 接入是 Phase 2.5.3 之后
+- ❌ 注销账号 (`DELETE /users/me`) — Apple 5.1.1 必需，UI 是后续 task
 
 ---
 
@@ -89,4 +136,5 @@ docs/
 
 ## 当前阶段
 
-**Phase 0 — Bootstrap**：MAP 骨架已就位，代码尚未启动。Phase 2.5 启动 = 开始建 Flutter 工程脚手架（见主仓 BACKLOG Phase 2.5）。
+**Phase 1 — Flutter scaffold 已就位**：4-tab 底部导航 + 登录 + JWT 持久化 + IM Token service 已实现（占位 tab，业务流待 Phase 2.5+ 接入）。本机交付时未装 Flutter SDK，所以 `ios/` `android/` 原生壳由首次运行 `flutter create` 自动生成。
+
