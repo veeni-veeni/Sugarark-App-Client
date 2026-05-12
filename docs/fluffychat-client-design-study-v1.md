@@ -266,3 +266,196 @@ No Matrix adoption.
 No client-side-only privacy filtering.
 SugarArk User App must remain SugarArk + Talkcore native.
 ```
+
+## 10. Source-level Findings
+
+Codex performed a targeted source review of FluffyChat at commit `b93bf5d`.
+
+Reviewed paths:
+
+- `lib/pages/chat_list/*`
+- `lib/pages/chat/*`
+- `lib/pages/chat/events/*`
+- `lib/widgets/matrix.dart`
+- `lib/widgets/layouts/two_column_layout.dart`
+- `lib/config/routes.dart`
+- `lib/config/themes.dart`
+- `lib/utils/matrix_sdk_extensions/flutter_matrix_dart_sdk_database/*`
+
+License reminder:
+
+- FluffyChat source is AGPL-3.0.
+- Use this only as design learning.
+- Do not copy source, widgets, helpers, or file structure verbatim.
+
+### 10.1 What the Source Actually Shows
+
+FluffyChat is a mature Matrix client. Its useful parts for SugarArk User App are chat UX mechanics and Flutter layering, not Matrix protocol code.
+
+| Area | Source observation | User App implication |
+|---|---|---|
+| Runtime root | `widgets/matrix.dart` centralizes Matrix clients, lifecycle, notification, active account, and app-wide subscriptions | User App needs a smaller `TalkcoreRuntime`; business auth/profile state remains outside |
+| Chat list | `chat_list` supports filters, unread, muted/pinned, search, placeholders, and throttled stream rebuilds | Messages tab should be store-backed and distinguish advisor chats, match groups, official channel |
+| Timeline | `chat.dart` + `chat_event_list.dart` implement reverse timeline, history pagination, scroll-to-event, read marker, pending/failed states | Directly useful for user chat timeline over Talkcore `seq` |
+| Message rendering | `events/message.dart` splits content rendering by message type and groups adjacent messages | Use typed bubbles plus SugarArk rich recommendation cards |
+| Media | Image/file/audio/video widgets handle placeholder, size metadata, download/send status | Useful with authenticated SugarArk media URLs and privacy rules |
+| Input | Composer supports reply/edit/draft/attachments/typing/selection mode | User App should start simpler, then add reply/edit/media as needed |
+| Adaptive layout | Two-column layout exists, but app is not mobile-only | User App V1 stays mobile-first; keep tablet-friendly architecture |
+| Cache | Matrix SDK database uses SQLite/SQLCipher and file cache expiry | Learn cache boundaries; do not persist sensitive PII or raw verification media |
+
+### 10.2 Patterns Worth Adopting
+
+#### Pattern 1: Store-backed Conversation List
+
+FluffyChat renders the chat list from SDK room state. User App should render from a Talkcore/SugarArk store:
+
+```text
+Talkcore event / SugarArk API response
+  -> ConversationStore
+  -> Messages tab
+```
+
+Conversation list item should support:
+
+- avatar
+- title
+- last message preview
+- unread count
+- muted/pinned state
+- official/advisor/group badge
+- last activity time
+
+#### Pattern 2: Explicit Timeline State
+
+Before building a full chat UI, define:
+
+```text
+TimelineState:
+  conversation_id
+  messages[]
+  has_older
+  is_loading_older
+  last_read_seq
+  pending_sends[]
+  scroll_target?
+```
+
+This avoids page widgets owning network state directly.
+
+#### Pattern 3: Message Bubbles By Domain Meaning
+
+FluffyChat splits message rendering by type. SugarArk User App should split by both message type and product meaning:
+
+```text
+TextMessageBubble
+ImageMessageBubble
+FileMessageBubble
+VoiceMessageBubble
+SystemMessageBubble
+RecommendationCardBubble
+OfficialAnnouncementBubble
+IntroGroupSystemBubble
+ReactionBar
+ReplyPreview
+```
+
+Recommendation cards are SugarArk business payloads, not generic Talkcore protocol assumptions.
+
+#### Pattern 4: Media States
+
+Adopt FluffyChat's UX idea of explicit media states:
+
+- thumbnail / placeholder
+- loading
+- failed
+- expired/unavailable
+- upload/send progress
+- tap-to-preview
+
+SugarArk-specific rule:
+
+```text
+Never expose raw /uploads/ URLs.
+Never persist sensitive verification media locally.
+```
+
+#### Pattern 5: Presence/Typing As Ephemeral UI
+
+FluffyChat renders typing as a timeline footer, not as a stored message.
+
+User App should do the same:
+
+```text
+typing / online / recording = transient UI state
+not local durable cache
+not timeline message
+```
+
+### 10.3 Patterns To Avoid
+
+Do not adopt:
+
+- Matrix SDK `Room/Event/Timeline` as UI model.
+- Matrix spaces/federation/E2EE assumptions.
+- Large controllers that mix protocol, UI, media, selection, and scroll logic.
+- Generic chat features that weaken SugarArk privacy/product boundaries.
+- AGPL source reuse.
+
+Use SugarArk/Talkcore-native models:
+
+```text
+ConversationVm
+MessageVm
+RecommendationCardVm
+TimelineState
+MediaAttachmentVm
+PresenceVm
+```
+
+### 10.4 Recommended First Implementation Shape
+
+As `features/chat` grows:
+
+```text
+lib/
+  core/
+    talkcore/
+      runtime/
+      event_router.dart
+      conversation_store.dart
+      timeline_store.dart
+      local_cache/
+      media_cache_policy.dart
+  features/
+    chat/
+      conversation_list/
+      chat_timeline/
+      composer/
+      rich_cards/
+      official_channel/
+      intro_group/
+      message_bubbles/
+```
+
+Minimum tests:
+
+- event router maps Talkcore message into `TimelineState`
+- duplicate echo does not duplicate message
+- history hydration preserves `seq` ordering
+- opening/closing chat preserves scroll position where practical
+- recommendation card renders without leaking hidden contact fields
+- media unavailable state does not show raw URL
+- typing state expires and is not persisted
+
+## 11. Final Source Review Judgment
+
+For SugarArk User App, FluffyChat is worth learning from for:
+
+- conversation list polish
+- timeline mechanics
+- message/media componentization
+- local cache discipline
+- mobile-first chat UX
+- adaptive architecture kept open for tablets
+
+It should not influence protocol, licensing, privacy, or business flow decisions.
