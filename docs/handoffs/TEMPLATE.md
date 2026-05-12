@@ -64,3 +64,35 @@ $ <BACKLOG 里那条验证命令>
 - iOS 构建: 绿/红
 - Android 构建: 绿/红
 - e2e: 绿/红/没跑
+
+---
+
+## v5.1 简化版 — Checkpoint C（推荐用这个）
+
+trivial / normal task 用本节即可——不需要填上面所有节。
+Architecture / security task 仍可填完整版以追加详细信息。
+
+```
+## Handoff (Checkpoint C — v5.1)
+
+Task type: <trivial | normal | architecture | security>
+
+What changed:
+- <改了什么，简短列表>
+
+Why:
+- <为什么做，1-2 句>
+
+Verification:
+- <跑了什么命令 + stdout 关键片段>
+
+Remaining risks:
+- <还有什么没处理 / deferred / none>
+
+Next action:
+- <下一个 agent / 用户应该做什么>
+
+Status: <DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED>
+```
+
+详见全局 `~/.claude/CLAUDE.md` §"Checkpoint A/B/C 系统"。

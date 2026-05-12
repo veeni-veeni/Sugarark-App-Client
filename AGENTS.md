@@ -181,3 +181,49 @@ Phase 3+ 评估抽取:
 ## 模板版本
 
 本文件 v1，对齐全局 MAP v2，参照 `sugarark/docs/crm/AGENTS.md` 和姊妹仓 `sugarark-staff-client/AGENTS.md`。
+
+---
+
+## v5.2 升级（2026-05-13 同步全局 MAP 协议）
+
+本仓现已对齐 MAP v5.2 全套：
+
+- **docs/MAP_PROFILE.md** —— 项目强度配置（default_mode: standard）
+- **docs/terms.md** —— 领域术语表（v4.7）
+- **docs/.out-of-scope/** —— 永不做归档（v4.7）
+- **docs/changes/** —— CR 协议 v4.0 + v5.1 4 级分流
+- **docs/bugs/** —— bug 蓄水池（v4.4）
+- **docs/reviews/REVIEW_PLAYBOOK.md** —— review 方法论（v4.9，stub 待 Codex 填）
+- **docs/retros/** —— Phase 完成必跑 /retro
+- **agents/** —— 6 角色（orchestrator / developer / reviewer / tester / security-auditor / strategic-reviewer）
+- **docs/handoffs/TEMPLATE.md** —— Checkpoint C 简版（v5.1）
+
+### Task Type 4 级（v5.1）
+
+每个 task 开工前先按 Checkpoint A 选 Task Type：
+- **trivial**: docs / typo / UI 文案微调（8 条全满足）
+- **normal**: 普通 Flutter 业务 / Widget 实现
+- **architecture**: 状态管理 / 路由 / 持久化方案
+- **security**: User JWT / IM Token / PII 缓存 / 视频认证
+
+详见全局 `~/.claude/CLAUDE.md` §"Task Type 4 级分级"。
+
+### Subagent Policy（v5.2）
+
+| Task Type | spawn 策略 |
+|---|---|
+| trivial | 禁 spawn |
+| normal | 单 agent / developer + reviewer |
+| architecture | orchestrator + developer + reviewer |
+| security | + tester + Codex 复审 |
+
+### 跨仓约束（v5.2 重申）
+
+- 改主仓 sugarark → HALT + 主仓 CR
+- 改 talkcore → HALT
+- 改姊妹仓 staff-client → OPEN_QUESTIONS
+- 改本仓 → 按 v5.2 流程
+
+## 模板版本
+
+本文件 v2，对齐全局 MAP **v5.2**（2026-05-13）。

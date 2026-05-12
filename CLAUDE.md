@@ -213,3 +213,19 @@ HTTP:    dio / http (Phase 2.5 选)
 > **本仓是 SugarArk 的 User App Flutter 客户端，主战场移动端 (iOS/Android)，跟姊妹仓 staff 共享 IM 集成层 (lazy extraction)。**
 > **所有架构权威在主仓 sugarark；本仓只做 Flutter 专属技术选型 + 渲染实现。**
 > **绝不在客户端持有 talkcore Internal JWT；绝不重写 talkcore 协议；绝不引入业务真相源。**
+
+---
+
+## v5.2 协议升级（2026-05-13）
+
+本仓现已对齐 MAP v5.2：
+
+- **进项目第一动作**：按 Checkpoint A 5 问（取代 v3 5 题自检）
+- **完成前**：Checkpoint B 6 问 + verify-before-claim（必粘 stdout）
+- **交接**：Checkpoint C 5 项 handoff（简版）
+- **Review / 修复 finding / 复审时**必读：`docs/reviews/REVIEW_PLAYBOOK.md`
+
+详见：
+- 全局协议：`~/.claude/CLAUDE.md`（v5.2）
+- 本仓配置：`docs/MAP_PROFILE.md`（default_mode: standard）
+- 全局模板：`~/.claude/refs/{map-profile,task-card,review-playbook}-template.md`

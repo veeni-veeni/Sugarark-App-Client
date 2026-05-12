@@ -87,3 +87,7 @@ Sugarark-App-Client = SugarArk 平台面向 daddy/baby 客户的 Flutter App。
 - 季度复读
 
 **本文件不超过 80 行（当前约 78 行）**。超了说明蒸馏失败，重组。
+
+---
+
+> 借口反驳总册：`~/.claude/refs/anti-rationalization.md`（v4.6 归集为全局元规则文件，本 INVARIANTS 只留核心红线）。
